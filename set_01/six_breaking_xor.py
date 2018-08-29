@@ -28,12 +28,13 @@
 # We get more tech support questions for this challenge than any of the other ones. We promise, there aren't any blatant errors in this text. In particular: the "wokka wokka!!!" edit distance really is 37.
 
 import base64
+import single_byte_xor_cipher_03 as xor
 
 #removing the base64 on the file to get the ciphertext
 file = open("6.txt", 'r')
 whole_file = []
 for line in file:
-  line = line.replace('\n', '')
+  # line = line.replace('\n', '')
   whole_file.append(base64.b64decode(line))
 whole_file = ''.join(whole_file)
 
@@ -57,24 +58,57 @@ def hamming_distance(binary1, binary2):
   return count
 
 def guess_keysize(message, size):
-  part1 = whole_file[0:size-1]
-  part2 = whole_file[size:(size*2)]
+  part1 = message[0:size-1]
+  part2 = message[size:(size*2)]
   binary1 = to_binary(part1)
   binary2 = to_binary(part2)
   edit_distance = hamming_distance(binary1,binary2) / size
   return edit_distance
 
-def calculate_keysizes():
+def calculate_keysizes(message):
   keysizes = {}
   for x in range(2,41):
-    edit_size = guess_keysize(whole_file, x)
+    edit_size = guess_keysize(message, x)
     try: 
       keysizes[edit_size].append(x)
     except KeyError:
       keysizes[edit_size] = [x]
   return keysizes
 
-#Hamming distance test:
+def smallest_keysize(keysizes, message, tries):
+  keysizes_more_samples = {}
+  for keysize in keysizes:
+    edit_size = 0
+    iterations = range(0,tries)
+    for x in iterations:
+      edit_size += guess_keysize(message[keysize*x:],keysize)
+    edit_size = round(edit_size / float(len(iterations)),2)
+    try: 
+      keysizes_more_samples[edit_size].append(keysize)
+    except KeyError:
+      keysizes_more_samples[edit_size] = [keysize]
+  return keysizes_more_samples
+
+def minimum(keysizes, message):
+  while len(keysizes[min(keysizes)]) > 1:
+    minimum = min(keysizes)
+    keysizes = smallest_keysize(keysizes[minimum], message, 6)
+  return keysizes[min(keysizes)][0]
+
+def break_up_file_by_keysize(key_size, message):
+  single_key_xor = {}
+  for byte in range(0, len(whole_file)):
+    modulo = byte % key_size
+    try:
+      single_key_xor[modulo].append(whole_file[byte])
+    except KeyError:
+      single_key_xor[modulo] = [whole_file[byte]]
+  strings = []
+  for key, value in single_key_xor.iteritems():
+    strings.append(''.join(value))
+  return strings
+
+# Hamming distance test:
 string1 = "this is a test\n"
 string2 = "wokka wokka!!!\n"
 
@@ -84,4 +118,15 @@ binary2 = to_binary(string2)
 expected_result = 37
 result = hamming_distance(binary1, binary2)
 assert expected_result == result
+
+# real test
+# keysizes = calculate_keysizes(whole_file)
+# key_size = minimum(keysizes, whole_file)
+keysizes = smallest_keysize(range(2,41), whole_file, 10)
+strings = break_up_file_by_keysize(key_size, whole_file)
+for astring in strings:
+  results, printable = [], []
+  results = xor.single_byte_xor(astring, all_results)
+  printable = xor.check_if_printable(all_results)
+  print xor.max_spaces(printable)
 
