@@ -28,7 +28,7 @@
 # We get more tech support questions for this challenge than any of the other ones. We promise, there aren't any blatant errors in this text. In particular: the "wokka wokka!!!" edit distance really is 37.
 
 import base64
-import single_byte_xor_cipher_03 as xor
+import three_single_byte_xor_cipher as xor
 
 #removing the base64 on the file to get the ciphertext
 file = open("6.txt", 'r')
@@ -122,11 +122,10 @@ assert expected_result == result
 # real test
 # keysizes = calculate_keysizes(whole_file)
 # key_size = minimum(keysizes, whole_file)
-keysizes = smallest_keysize(range(2,41), whole_file, 10)
+keysizes = smallest_keysize(range(2,41), whole_file, 20)
 strings = break_up_file_by_keysize(key_size, whole_file)
 for astring in strings:
   results, printable = [], []
-  results = xor.single_byte_xor(astring, all_results)
-  printable = xor.check_if_printable(all_results)
+  results = xor.single_byte_xor(astring, results)
+  printable = xor.check_if_printable(results)
   print xor.max_spaces(printable)
-

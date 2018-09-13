@@ -7,24 +7,24 @@
 import binascii 
 import string
 
-def single_byte_xor(binary, all_results):
+def single_byte_xor(binary, results):
   for xor_key in range(256):
     string = ''.join(chr(ord(b) ^ xor_key) for b in binary)
-    all_results.append(string)
-  return all_results
+    results[xor_key] = string
+  return results
 
-def check_if_printable(all_results):
-  printable_results = []
-  for result in all_results:
+def check_if_printable(results):
+  printable_results = {}
+  for key,result in results.iteritems():
     if set(result).issubset(set(string.printable)):
-      printable_results.append(result)
+      printable_results[key] = result
   return printable_results
 
 def max_spaces(results):
-  return max(results, key=lambda string: string.count(' '))
+  return max(results.items(), key=lambda (key,string): string.count(' '))
 
 def main():
-  results = []
+  results = {}
   hex_string = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
   binary = binascii.unhexlify(hex_string)
   results = single_byte_xor(binary, results)
