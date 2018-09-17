@@ -9,6 +9,7 @@ file = open("4.txt", "r")
 all_results = []
 for line in file:
   line = line.replace('\n','')
+  line = binascii.unhexlify(line)
   all_results = xor.single_byte_xor(line, all_results)
 printable_results = xor.check_if_printable(all_results)
 print xor.max_spaces(printable_results)
