@@ -7,7 +7,8 @@
 import binascii 
 import string
 
-def single_byte_xor(binary, results):
+def single_byte_xor(binary):
+  results = {}
   for xor_key in range(256):
     string = ''.join(chr(ord(b) ^ xor_key) for b in binary)
     results[xor_key] = string
@@ -27,7 +28,7 @@ def main():
   results = {}
   hex_string = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
   binary = binascii.unhexlify(hex_string)
-  results = single_byte_xor(binary, results)
+  results = single_byte_xor(binary)
   printable = check_if_printable(results)
   print max_spaces(printable)
 
