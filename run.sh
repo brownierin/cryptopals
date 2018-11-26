@@ -1,4 +1,4 @@
 #!/bin/bash
 
 docker build -t cryptopals . 
-docker run -it --rm cryptopals bash
+docker run --name cryptopals -it cryptopals bash
