@@ -21,12 +21,9 @@ def find_printable(all_xors):
     printable_results = xor.check_if_printable(line)
     if printable_results != {}:
       all_printables.append(xor.max_spaces(printable_results))
-    return max(all_printables, key=lambda printable: printable[1].count(' '))
+  return max(all_printables, key=lambda printable: printable[1].count(' '))
 
 def main():
   file = file_open_unhexlify('4.txt')
   all_xors = get_all_xors(file)
   print find_printable(all_xors)
-
-
-    
