@@ -25,34 +25,46 @@ from .ten import aes_ecb_encrypt, aes_ecb_decrypt, aes_cbc_encrypt, aes_cbc_decr
 from .nine import pad_block
 import os
 import random
-import set_01.eight
+import set_01.eight as eight
 
 KEY_SIZE = 16 
 
 def make_me_a_key():
-  return os.urandom(KEY_SIZE)
-
-def encryption_oracle(data):
-  key = make_me_a_key()
-  padding_amount = random.randrange(5,11)
-  padding = padding_amount * '\x00'
-  data = padding + data + padding
-  data = pad_block(data, KEY_SIZE)
-  if coin_flip() == 0:
-    return aes_ecb_encrypt(key, data)
-  else:
-    return aes_cbc_encrypt(key, data)
-
-def detect(ciphertext):
-  # figure out how to import 8?
-  print "lalala"
+    return os.urandom(KEY_SIZE)
 
 def coin_flip():
-  return random.randrange(0,2)
+    return random.randrange(0,2)
+
+def encryption_oracle(data):
+    key = make_me_a_key()
+    padding_amount = random.randrange(5,11)
+    padding = padding_amount * '\x00'
+    data = padding + data + padding
+    data = pad_block(data, KEY_SIZE)
+    flip = coin_flip()
+    if flip == 0:
+        return aes_ecb_encrypt(key, data), flip
+    else:
+        return aes_cbc_encrypt(key, data), flip
+
+def detect(ciphertext):
+    results = {ciphertext: eight.check_the_line(ciphertext)} 
+    answer = eight.detect_ecb_mode(results)
+    if answer == {}:
+        print "This ciphertext is encrypted in CBC mode"
+        return 1
+    for potential in answer:
+        most_repeated_block = max(results[potential], key=lambda i: results[potential][i])
+        print "This ciphertext is encrypted in ECB mode"
+        print "The block {!r} was repeated {} times".format(most_repeated_block, results[potential][most_repeated_block])
+        return 0
 
 def main():
-  print "test"
-  print "{!r}".format(encryption_oracle("yellow submarine"))
+    print "===test case 1==="
+    plaintext = "YELLOW SUBMARINE" *15
+    ciphertext, flip = encryption_oracle(plaintext)
+    print "Ciphertext is: {!r}".format(ciphertext)
+    assert detect(ciphertext) == flip
 
 if __name__ == '__main__':
-  main()
+    main()

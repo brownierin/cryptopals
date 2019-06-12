@@ -1,6 +1,11 @@
-# Detect AES in ECB mode
-# In this file are a bunch of hex-encoded ciphertexts. One of them has been encrypted with ECB. Detect it.
-# Remember that the problem with ECB is that it is stateless and deterministic; the same 16 byte plaintext block will always produce the same 16 byte ciphertext.
+"""
+Detect AES in ECB mode
+In this file are a bunch of hex-encoded ciphertexts.
+One of them has been encrypted with ECB. Detect it.
+Remember that the problem with ECB is that it is
+stateless and deterministic; the same 16 byte plaintext
+block will always produce the same 16 byte ciphertext.
+"""
 
 import collections
 import binascii
@@ -31,7 +36,7 @@ def check_the_line(line):
     work = work[BLOCK_SIZE:]
   return data
 
-if __name__ == '__main__':
+def main():
   data = file_read_unhex('8.txt')
   results = compute_repetitions(data)
   answer = detect_ecb_mode(results)
@@ -39,3 +44,6 @@ if __name__ == '__main__':
     most_repeated_block = max(results[potential], key=lambda i: results[potential][i])
     print "This ciphertext is encrypted in ECB mode: {!r}".format(potential)
     print "The block {!r} was repeated {} times".format(most_repeated_block, results[potential][most_repeated_block])
+
+if __name__ == '__main__':
+    main()
