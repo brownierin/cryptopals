@@ -8,26 +8,28 @@
 # The file here is intelligible (somewhat) when CBC decrypted against "YELLOW SUBMARINE" with an IV of all ASCII 0 (\x00\x00\x00 &c)
 
 import base64
-from Crypto.Cipher import AES
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 
 INITIAL_IV = '\x00' * 16
 
-def open_file(filename):
-  file = open(filename, 'r')
-  whole_file = []
-  for line in file: 
-    line = line.strip('\n')
-    whole_file.append(base64.b64decode(line))
-  return ''.join(whole_file)
+def file_open_decode_b64(filename):
+  with open(filename, 'r') as file:
+    whole_file = [base64.b64decode(line.strip('/n')) for line in file]
+    return ''.join(whole_file)
 
 def aes_ecb_encrypt(key, data):
-  cipher = AES.new(key, AES.MODE_ECB)
-  ciphertext = cipher.encrypt(data)
+  backend = default_backend()
+  cipher = Cipher(algorithms.AES(key), modes.ECB, backend=backend)
+  encryptor = cipher.encryptor()
+  ciphertext = encryptor.update(data) + encryptor.finalize()
   return ciphertext
 
 def aes_ecb_decrypt(key, data):
-  cipher = AES.new(key, AES.MODE_ECB)
-  plaintext = cipher.decrypt(data)
+  backend = default_backend()
+  cipher = Cipher(algorithms.AES(key), modes.ECB, backend=backend)
+  decryptor = cipher.decryptor()
+  plaintext = decryptor.update(ct) + decryptor.finalize()
   return plaintext
 
 def iv_xor(string1, string2):
@@ -41,9 +43,8 @@ def aes_cbc_encrypt(key, data):
   key_size = len(key)
   number_of_blocks = len(data) / key_size
   ciphertext = []
+  next_iv = INITIAL_IV
   for block in range(number_of_blocks):
-    if block == 0:
-      next_iv = INITIAL_IV
     position = key_size * block
     text = iv_xor(data[position:(position+key_size)], next_iv)
     ciphertext.append(aes_ecb_encrypt(key, text))
@@ -54,9 +55,8 @@ def aes_cbc_decrypt(key, data):
   key_size = len(key)
   number_of_blocks = len(data) / key_size
   plaintext = []
+  next_iv = INITIAL_IV
   for block in range(number_of_blocks):
-    if block == 0:
-      next_iv = INITIAL_IV
     position = key_size * block
     text = aes_ecb_decrypt(key, data[(position):(position+key_size)])
     plain = iv_xor(text, next_iv)
@@ -66,7 +66,7 @@ def aes_cbc_decrypt(key, data):
 
 def main():
   key = 'YELLOW SUBMARINE'
-  data = open_file('10.txt')
+  data = file_open_decode_b64('10.txt')
   decryption = aes_cbc_decrypt(key, data)
   print "{!r}".format(decryption)
   return decryption

@@ -2,16 +2,14 @@
 # In this file are a bunch of hex-encoded ciphertexts. One of them has been encrypted with ECB. Detect it.
 # Remember that the problem with ECB is that it is stateless and deterministic; the same 16 byte plaintext block will always produce the same 16 byte ciphertext.
 
+import collections
 import binascii
 
 BLOCK_SIZE = 16
 
 def file_read_unhex(filename):
-  file = open(filename,'r')
-  data = []
-  for line in file:
-    data.append(binascii.unhexlify(line.strip('\n')))
-  return data
+  with open(filename, "r") as f:
+    return [binascii.unhexlify(line.strip('\n')) for line in f]
 
 def compute_repetitions(data):
   results = {}
@@ -20,26 +18,19 @@ def compute_repetitions(data):
   return results
 
 def detect_ecb_mode(results):
-  ecb = {}
+  ecb = collections.defaultdict(list)
   for line, dictionary in results.items():
     for chunk, count in dictionary.items():
       if count >= 2:
-        try: 
-          ecb[line].append(chunk)
-        except KeyError:
-          ecb[line] = [chunk]
+        ecb[line].append(chunk)
   return ecb
 
 def check_the_line(line):
-  size = len(line)
   work = line
-  data = {}
-  for i in range(size/BLOCK_SIZE):
+  data = collections.Counter()
+  for _ in range(len(line)// BLOCK_SIZE):
     chunk = work[:BLOCK_SIZE]
-    if chunk in data:
-      data[chunk] += 1
-    else:
-      data[chunk] = 1
+    data[chunk] += 1
     work = work[BLOCK_SIZE:]
   return data
 

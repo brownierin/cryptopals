@@ -11,17 +11,12 @@ def message_padding_size(plaintext, block_size):
 
 def pad_block(plaintext, block_size):
   padding_size = message_padding_size(plaintext, block_size)
-  padding = chr(padding_size) * padding_size
-  if len(plaintext) > block_size:
-    number_of_blocks = len(plaintext) / block_size
-    padded = plaintext[block_size*number_of_blocks:] + padding
-  else: 
-    padded = plaintext + padding
-  return padded
+  padding = chr(padding_size) * padding_size  # this will break in py3
+  return plaintext + padding
 
 def main():
   # case for plaintext smaller than the block size
-  padded = pad_block("YELLOW SUBMARINE",20)
+  padded = pad_block("YELLOW SUBMARINE", 20)
   print "The padded block is: {!r}".format(padded)
   # case for plaintext larger than the block size
   padded = pad_block("YELLOW SUBMARINEYELLOW SUBMARINE", 20)

@@ -12,12 +12,10 @@
 import base64
 from Crypto.Cipher import AES
 
-def file_read_decode(filename):
-  file = open(filename,'r')
-  whole_file = []
-  for line in file:
-    whole_file.append(base64.b64decode(line))
-  return ''.join(whole_file)
+def file_open_decode_b64(filename):
+  with open(filename, 'r') as file:
+    whole_file = [base64.b64decode(line) for line in file]
+    return ''.join(whole_file)
 
 def aes_ecb_decrypt(key, data):
   cipher = AES.new(key, AES.MODE_ECB)
@@ -26,7 +24,7 @@ def aes_ecb_decrypt(key, data):
 
 if __name__ == '__main__':
   key = "YELLOW SUBMARINE"
-  data = file_read_decode('7.txt')
+  data = file_open_decode_b64('7.txt')
   plaintext = aes_ecb_decrypt(key, data)
   print "===PLAINTEXT==="
   print plaintext
