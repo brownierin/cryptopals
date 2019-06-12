@@ -12,10 +12,7 @@ def file_read_unhex(filename):
     return [binascii.unhexlify(line.strip('\n')) for line in f]
 
 def compute_repetitions(data):
-  results = {}
-  for line in data:
-    results[line] = check_the_line(line)
-  return results
+  return {line: check_the_line(line) for line in data}
 
 def detect_ecb_mode(results):
   ecb = collections.defaultdict(list)
